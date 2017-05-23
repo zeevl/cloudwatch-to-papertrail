@@ -63,6 +63,8 @@ exports.handler = function (event, context, cb) {
       return cb(err);
     }
 
+    var data = JSON.parse(result.toString('utf8'));
+
     dogapi.initialize({
       api_key: config.datadog
     });
@@ -74,15 +76,13 @@ exports.handler = function (event, context, cb) {
     log.add(papertrailTransport, {
       host: config.host,
       port: config.port,
-      program: config.program,
       hostname: config.appname,
+      program: data.logGroup,
       flushOnClose: true,
       logFormat: function (level, message) {
         return message;
       }
     });
-
-    var data = JSON.parse(result.toString('utf8'));
 
     var metricRegex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z)\ -\ info:\ ([a-z]+):.*?(metric#.*)+$/;
     var reportRegex = /^REPORT\ RequestId.*Billed\ Duration:\ ([0-9]+)\ ms.*Used:\ ([0-9]+)\ MB$/;
